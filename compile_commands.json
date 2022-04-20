@@ -1,6 +1,0 @@
-[
-{
-  "directory": "/home/lucas/space/cSpace/dsa",
-  "arguments": ["/usr/bin/gcc", "-c", "-m64", "-std=c++20", "-Iinclude", "-o", "build/.objs/dsa/linux/x86_64/src/main.cpp.o", "src/main.cpp"],
-  "file": "src/main.cpp"
-}]
