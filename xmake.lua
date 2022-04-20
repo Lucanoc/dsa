@@ -3,6 +3,10 @@ add_rules("mode.debug", "mode.release")
 target("dsa")
     set_kind("binary")
     add_files("src/*.cpp")
+    add_includedirs("include")
+target_end()
+
+set_languages("cxx20")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io

@@ -1,99 +1,98 @@
 #pragma once
 
 #include "sort/insertionSort.hpp"
-#include <iostream>
 #include <random>
 #include <ctime>
+namespace dsa {
+    template <typename T>
+    inline
+    T __quickSort(T begin, T end)
+    {
+        std::default_random_engine e(time(nullptr));
 
-template <typename T>
-T __quickSort(T begin, T end)
-{
-    std::default_random_engine e(std::time(nullptr));
-    
-    std::uniform_int_distribution<int> d(0, end - begin - 1);
+        std::uniform_int_distribution<int> d(0, end - begin - 1);
 
-    std::swap(*begin, *(begin + d(e)));
+        std::swap(*begin, *(begin + d(e)));
 
-    T right = begin;
+        T last {begin};
 
-    for (T i = begin + 1; i != end; ++i) {
-        if (*i < *begin) {
-            std::swap(*i, *(++right));
+        for (T i {begin + 1}; i != end; ++i) {
+            if (*i < *begin) {
+                std::swap(*(++last), *i);
+            }
         }
+
+        std::swap(*last, *begin);
+
+        return last;
     }
 
-    std::swap(*begin, *right);
+    template <typename T>
+    inline
+    void quickSort(T begin, T end)
+    {
+        if (end - begin <= 1) {
+            insertionSort(begin, end);
 
-    return right;
-}
-
-template <typename T>
-void quickSort(T begin, T end)
-{
-    if (end - begin <= 1) {
-        insertionSort(begin, end);
-
-        return;
-    }
-
-    T _base = __quickSort(begin, end);
-
-    quickSort(begin, _base);
-    quickSort(_base + 1, end);
-}
-
-template <typename T>
-struct itSaver {
-    T left;
-    T right;
-};
-
-template <typename T>
-itSaver<T> __quickSort2(T begin, T end)
-{
-    std::cout << __FUNCTION__ << '\n';
-
-    std::default_random_engine e(std::time(nullptr));
-
-    std::uniform_int_distribution<int> d(0, end - begin - 1);
-
-    std::swap(*begin, *(begin + d(e)));
-
-    // srand(time(nullptr));
-    // std::swap(*begin, *(rand() % (end - begin) + begin));
-
-    itSaver<T> saver {begin, end};
-
-    T mover = begin + 1;
-
-    while (mover != saver.right) {
-        if (*mover < *begin) {
-            std::swap(*mover, *(++saver.left));
-
-            ++mover;
-        } else if (*mover > *begin) {
-            std::swap(*mover, *(--saver.right));
-        } else {
-            ++mover;
+            return;
         }
+
+        T base {__quickSort(begin, end)};
+
+        quickSort(begin, base);
+        quickSort(base + 1, end);
     }
 
-    std::swap(*begin, *saver.left);
+    template <typename T>
+    struct lasts {
+        T llast {};
+        T rlast {};
+    };
 
-    return saver;
-}
+    template <typename T>
+    inline
+    lasts<T> __quickSort3(T begin, T end)
+    {
+        std::default_random_engine e(time(nullptr));
 
-template <typename T>
-void quickSort2(T begin, T end)
-{
-    if (end - begin <= 1) {
-        insertionSort(begin, end);
+        std::uniform_int_distribution<int> d(0, end - begin - 1);
 
-        return;
-    } 
+        std::swap(*begin, *(begin + d(e)));
 
-    auto [left, right] = __quickSort2(begin, end);
+        lasts<T> l {begin, end};
 
-    quickSort2(begin, left);
-    quickSort2(right, end);
+        T moving {begin + 1};
+
+        while (moving != l.rlast) {
+            if (*moving < *begin) {
+                std::swap(*moving, *(++l.llast));
+            } else if (*begin < *moving) {
+                std::swap(*moving, *(--l.rlast));
+
+                continue;
+            }
+
+            ++moving;
+        }
+
+        std::swap(*begin, *l.llast);
+
+        return l;
+    }
+
+    template <typename T>
+    inline
+    void quickSort3(T begin, T end)
+    {
+        if (end - begin <= 1) {
+            insertionSort(begin, end);
+
+            return;
+        }
+
+        auto [llast, rlast] {__quickSort3(begin, end)};
+
+        quickSort3(begin, llast);
+        quickSort3(rlast, end);
+    }
 }

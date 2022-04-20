@@ -22,3 +22,27 @@ T binarySearch(T begin, T end, const V & des)
 
     return res;
 }
+
+namespace dsa {
+    template <typename T, typename K>
+    T binarySearch(T begin, T end, const K & des)
+    {
+        if (end - begin <= 0) {
+            return T();
+        }
+
+        while (begin != end) {
+            T mid {((end - begin) >> 1) + begin};
+
+            if (*mid < des) {
+                begin = mid + 1;
+            } else if (des < *mid) {
+                end = mid;
+            } else {
+                return mid;
+            }
+        }
+
+        return T();
+    }
+}

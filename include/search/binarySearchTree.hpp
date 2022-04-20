@@ -1,227 +1,219 @@
 #pragma once
 
 #include <stdexcept>
-template <typename K, typename V>
-struct treeNode {
-    K key;
-    V value;
-    treeNode * left = nullptr;
-    treeNode * right = nullptr;
-};
+namespace dsa {
+    template <typename K, typename V>
+    struct treeNode {
+        K key {};
+        V value {};
+        treeNode * left {};
+        treeNode * right {};
+    };
 
-template <typename K, typename V>
-inline
-void treeReverse(treeNode<K, V> * nowNode)
-{
-    if (nowNode) {
-        treeNode<K, V> * _tmp = nowNode->left;
-        nowNode->left = nowNode->right;
-        nowNode->right = _tmp;
-
-        treeReverse(nowNode->left);
-        treeReverse(nowNode->right);
-    }
-}
-
-template <typename K, typename V>
-class binarySearchTree {
-    public:
-    ~binarySearchTree()
+    template <typename K, typename V>
+    void treeReverse(treeNode<K, V> * nowNode)
     {
-        if (root) {
-            __destory(root);
+        while (nowNode) {
+            treeNode<K, V> * _tmp {nowNode->left};
+            nowNode->left = nowNode->right;
+            nowNode->right = _tmp;
+
+            treeReverse(nowNode->left);
+            treeReverse(nowNode->right);
         }
     }
 
-    binarySearchTree(binarySearchTree &&);
-    binarySearchTree & operator=(binarySearchTree &&);
+    template <typename K, typename V>
+    class bst {
+        public:
+        ~bst();
+        bst(bst &&) = delete;
 
-    binarySearchTree()
+        bst();
+
+        void insert(const K &, const V &);
+        void remove(const K &);
+        bool contain(const K &) const;
+        const V & operator[](const K &) const;
+
+        private:
+        void destory(treeNode<K, V> *);
+        treeNode<K, V> * inserting(treeNode<K, V> *, const K &, const V &);
+        treeNode<K, V> * removing(treeNode<K, V> *, const K &);
+        treeNode<K, V> * finding(treeNode<K, V> *, const K &) const;
+        treeNode<K, V> * getMaxNode(treeNode<K, V> *);
+        treeNode<K, V> * getMinNode(treeNode<K, V> *);
+
+        treeNode<K, V> * root;
+    };
+
+    template <typename K, typename V>
+    inline
+    bst<K, V>::~bst()
+    {
+        if (root) {
+            destory(root);
+        }
+    }
+
+    template <typename K, typename V>
+    inline
+    bst<K, V>::bst()
     : root(nullptr)
     {
 
     }
 
-    void setKey(const K &, const V &);
-    void deleteKey(const K &);
-    bool contain(const K &) const;
-    const V & operator[](const K &) const;
-
-    private:
-    treeNode<K, V> * __setKey(treeNode<K, V> *, const K &, const V &);
-    treeNode<K, V> * __deleteKey(treeNode<K, V> *, const K &);
-    treeNode<K, V> * __contain(treeNode<K, V> *, const K &) const;
-    treeNode<K, V> * __get(treeNode<K, V> *, const K &) const;
-    treeNode<K, V> * __getMaxKey(treeNode<K, V> *);
-    treeNode<K, V> * __getMinKey(treeNode<K, V> *);
-
-    void __destory(treeNode<K, V> *);
-
-    treeNode<K, V> * root;
-};
-
-template <typename K, typename V>
-inline
-void binarySearchTree<K, V>::__destory(treeNode<K, V> * nowNode)
-{
-    if (nowNode) {
-        __destory(nowNode->left);
-        __destory(nowNode->right);
-
-        delete nowNode;
+    template <typename K, typename V>
+    inline
+    void bst<K, V>::insert(const K & key, const V & value)
+    {
+        root = inserting(root, key, value);
     }
-}
 
-template <typename K, typename V>
-inline
-void binarySearchTree<K, V>::setKey(const K & key, const V & value)
-{
-    root = __setKey(root, key, value);
-}
-
-template <typename K, typename V>
-inline
-void binarySearchTree<K, V>::deleteKey(const K & key)
-{
-    if (contain(key)) {
-        root = __deleteKey(root, key);
+    template <typename K, typename V>
+    inline
+    void bst<K, V>::remove(const K & key)
+    {
+        if (contain(key)) {
+            removing(root, key);
+        }
     }
-}
 
-template <typename K, typename V>
-inline
-bool binarySearchTree<K, V>::contain(const K & key) const
-{
-    if (__contain(root, key)) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-template <typename K, typename V>
-inline
-const V & binarySearchTree<K, V>::operator[](const K & key) const
-{
-    if (contain(key)) {
-        return __get(root, key)->value;
-    } else {
-        throw std::out_of_range("no this key in mst\n");
-    }
-}
-
-template <typename K, typename V>
-inline
-treeNode<K, V> * binarySearchTree<K, V>::__setKey(treeNode<K, V> * nowNode, const K & key, const V & value)
-{
-    if (nowNode) {
-        if (nowNode->key == key) {
-            nowNode->value = value;
-        } else if (nowNode->key < key) {
-            nowNode->right = __setKey(nowNode->right, key, value);
+    template <typename K, typename V>
+    inline
+    bool bst<K, V>::contain(const K & key) const
+    {
+        if (finding(root, key)) {
+            return true;
         } else {
-            nowNode->left = __setKey(nowNode->left, key, value);
+            return false;
+        }
+    }
+
+    template <typename K, typename V>
+    inline
+    const V & bst<K, V>::operator[](const K & key) const
+    {
+        treeNode<K, V> * res {finding(root, key)};
+
+        if (res) {
+            return res->value;
+        } else {
+            throw std::logic_error("no key in tree\n");
+        }
+    }
+
+    template <typename K, typename V>
+    inline
+    treeNode<K, V> * bst<K, V>::inserting(treeNode<K, V> * nowNode, const K & key, const V & value) {
+        if (nowNode) {
+            if (key < nowNode->key) {
+                nowNode->left = inserting(nowNode->left, key, value);
+            } else if (nowNode->key < key) {
+                nowNode->right = inserting(nowNode->right, key, value);
+            } else {
+                nowNode->value = value;
+            }
+
+            return nowNode;
+        } else {
+            return new treeNode<K, V> {key, value};
+        }
+    }
+
+    template <typename K, typename V>
+    inline
+    treeNode<K, V> * bst<K, V>::removing(treeNode<K, V> * nowNode, const K & key)
+    {
+        if (nowNode->key < key) {
+            nowNode->right = removing(nowNode->right, key);
+        } else if (key < nowNode->key) {
+            nowNode->left = removing(nowNode->left, key);
+        } else {
+            if (!nowNode->left) {
+                treeNode<K, V> * _tmp {nowNode->right};
+                delete nowNode;
+
+                return _tmp;
+            }
+
+            if (!nowNode->right) {
+                treeNode<K, V> * _tmp {nowNode->left};
+
+                delete nowNode;
+
+                return _tmp;
+            }
+
+            auto [_key, _value, _left, _right] {*getMaxNode(nowNode->left)};
+
+            nowNode->left = removing(nowNode->left, _key);
+
+            nowNode->key = _key;
+            nowNode->value = _value;
         }
 
         return nowNode;
-    } else {
-        return new treeNode<K, V> {key, value};
     }
-}
 
-template <typename K, typename V>
-inline
-treeNode<K, V> * binarySearchTree<K, V>::__deleteKey(treeNode<K, V> * nowNode, const K & key)
-{
-    if (nowNode->key < key) {
-        nowNode->right = __deleteKey(nowNode->right, key);
-    } else if (nowNode->key > key) {
-        nowNode->left = __deleteKey(nowNode->left, key);
-    } else {
-        if (!nowNode->left) {
-            treeNode<K, V> * _tmp = nowNode->right;
+    template <typename K, typename V>
+    inline
+    treeNode<K, V> * bst<K, V>::finding(treeNode<K, V> * nowNode, const K & key) const
+    {
+        if (nowNode) {
+            if (key < nowNode->key) {
+                return finding(nowNode->left, key);
+            } else if (nowNode->key < key) {
+                return finding(nowNode->right, key);
+            } else {
+                return nowNode;
+            }
+        } else {
+            return nullptr;
+        }
+    }
+
+    template <typename K, typename V>
+    inline
+    treeNode<K, V> * bst<K, V>::getMaxNode(treeNode<K, V> * nowNode)
+    {
+        if (nowNode) {
+            if(nowNode->right) {
+                return getMaxNode(nowNode->right);
+            } else {
+                return nowNode;
+            }
+        } else {
+            return nullptr;
+        }
+    }
+
+    template <typename K, typename V>
+    inline
+
+    treeNode<K, V> * bst<K, V>::getMinNode(treeNode<K, V> * nowNode)
+    {
+        if (nowNode) {
+            if (nowNode->left) {
+                return getMinNode(nowNode->left);
+            } else {
+                return nowNode;
+            }
+        } else {
+            return nullptr;
+        }
+    }
+
+    template <typename K, typename V>
+    inline
+    void bst<K, V>::destory(treeNode<K, V> * nowNode)
+    {
+        if(nowNode) {
+            destory(nowNode->left);
+            destory(nowNode->right);
 
             delete nowNode;
-
-            return _tmp;
         }
-
-        if (!nowNode->right) {
-            treeNode<K, V> * _tmp = nowNode->left;
-
-            delete nowNode;
-
-            return _tmp;
-        }
-
-        auto [_key, _value, _left, _right] 
-        = *__getMaxKey(nowNode->left);
-
-        deleteKey(_key);
-
-        nowNode->key = _key;
-        nowNode->value = _value;
-    }
-
-    return nowNode;
-}
-
-template <typename K, typename V>
-inline
-treeNode<K, V> * binarySearchTree<K, V>::__contain(treeNode<K, V> * nowNode, const K & key) const 
-{
-    if (nowNode) {
-        if (nowNode->key == key) {
-            return nowNode;
-        } else if (nowNode->key < key) {
-            return __contain(nowNode->right, key);
-        } else {
-            return __contain(nowNode->left, key);
-        }
-    } else {
-        return nullptr;
-    }
-}
-
-template <typename K, typename V>
-inline
-treeNode<K, V> * binarySearchTree<K, V>::__get(treeNode<K, V> * nowNode, const K & key) const
-{
-    if (nowNode->key < key) {
-        return __get(nowNode->right, key);
-    } else if (nowNode->key > key) {
-        return __get(nowNode->left, key);
-    } else {
-        return nowNode;
-    }
-}
-
-template <typename K, typename V>
-inline
-treeNode<K, V> * binarySearchTree<K, V>::__getMaxKey(treeNode<K, V> * nowNode)
-{
-    if (nowNode) {
-        if (nowNode->right) {
-            return __getMaxKey(nowNode->right);
-        } else {
-            return nowNode;
-        }
-    } else {
-        return nullptr;
-    }
-}
-
-template <typename K, typename V>
-inline
-treeNode<K, V> * binarySearchTree<K, V>::__getMinKey(treeNode<K, V> * nowNode)
-{
-    if (nowNode) {
-        if (nowNode->left) {
-            return __getMinKey(nowNode->left);
-        } else {
-            return nowNode;
-        }
-    } else {
-        return nullptr;
     }
 }
